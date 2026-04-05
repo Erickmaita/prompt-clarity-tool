@@ -1,12 +1,6 @@
 {
-  "version": 2,
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs22.x"
-    }
-  },
-  "routes": [
-    { "src": "/health", "dest": "/api/health.js" },
-    { "src": "/optimize", "dest": "/api/optimize.js" }
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/optimize", "destination": "/api/optimize" }
   ]
 }
