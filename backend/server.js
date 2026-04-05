@@ -5,8 +5,39 @@ const cors = require("cors");
 const { z } = require("zod");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+/**
+ * CORS profesional:
+ * - Permite localhost (desarrollo)
+ * - Permite tu GitHub Pages
+ * - Permite dominios extra desde FRONTEND_ORIGINS (coma separada)
+ */
+const envOrigins = (process.env.FRONTEND_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const allowedOrigins = [
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://erickmaita.github.io",
+  ...envOrigins
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Permite herramientas sin origin (curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    }
+  })
+);
+
+app.use(express.json({ limit: "1mb" }));
 
 const PORT = process.env.PORT || 3001;
 
@@ -18,13 +49,13 @@ console.log("🌐 JUNE_API_URL →", process.env.JUNE_API_URL || "NO CONFIGURADA
 
 // Schema modo ahorro
 const schema = z.object({
-  intent: z.string(),
+  intent: z.string().min(1),
   clarity_score: z.number().min(0).max(1),
-  optimized_prompt: z.string(),
-  short_prompt: z.string()
+  optimized_prompt: z.string().min(1),
+  short_prompt: z.string().min(1)
 });
 
-// Recomendado: dejar 1 modelo estable en .env
+// Recomendado en .env:
 // JUNE_MODELS=deepseek/deepseek-v3.2
 const MODEL_CANDIDATES = (process.env.JUNE_MODELS || "deepseek/deepseek-v3.2")
   .split(",")
@@ -43,8 +74,16 @@ function extractModelText(data) {
 
 function extractJsonFromText(text) {
   if (typeof text !== "string") return null;
-  const match = text.match(/\{[\s\S]*\}/);
+
+  // Limpia bloques markdown si vinieran
+  const cleaned = text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) return null;
+
   try {
     return JSON.parse(match[0]);
   } catch {
@@ -74,6 +113,10 @@ Texto del usuario:
 ${userPrompt}`;
 }
 
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "prompt-clarity-tool", status: "running" });
+});
+
 app.get("/health", (req, res) => {
   return res.json({
     ok: true,
@@ -84,9 +127,9 @@ app.get("/health", (req, res) => {
 
 app.post("/optimize", async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt } = req.body || {};
 
-    if (!prompt || typeof prompt !== "string" || prompt.trim().length < 3 || prompt.length > 1000) {
+    if (!prompt || typeof prompt !== "string" || prompt.trim().length < 3 || prompt.trim().length > 1000) {
       return res.status(400).json({ error: "Invalid prompt (3-1000 chars required)" });
     }
 
@@ -99,27 +142,41 @@ app.post("/optimize", async (req, res) => {
     }
 
     const errors = [];
+    const inputPrompt = prompt.trim();
 
     for (const model of MODEL_CANDIDATES) {
       const payload = {
         model,
-        messages: [{ role: "user", content: buildOptimizerPrompt(prompt) }],
+        messages: [{ role: "user", content: buildOptimizerPrompt(inputPrompt) }],
         temperature: 0,
         max_tokens: 260
       };
 
-      const response = await fetch(process.env.JUNE_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.JUNE_API_KEY}`
-        },
-        body: JSON.stringify(payload)
-      });
+      let response;
+      let raw = "";
+      let requestId = null;
 
-      const raw = await response.text();
-      const headersObj = Object.fromEntries(response.headers.entries());
-      const requestId = headersObj["x-request-id"] || null;
+      try {
+        response = await fetch(process.env.JUNE_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.JUNE_API_KEY}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        raw = await response.text();
+        const headersObj = Object.fromEntries(response.headers.entries());
+        requestId = headersObj["x-request-id"] || null;
+      } catch (networkErr) {
+        errors.push({
+          model,
+          error: "Network error calling upstream API",
+          message: networkErr.message
+        });
+        continue;
+      }
 
       console.log(`UPSTREAM STATUS [${model}] ->`, response.status, "| request_id:", requestId);
 
@@ -132,7 +189,13 @@ app.post("/optimize", async (req, res) => {
       try {
         outer = JSON.parse(raw);
       } catch {
-        errors.push({ model, status: response.status, request_id: requestId, error: "Invalid outer JSON", raw });
+        errors.push({
+          model,
+          status: response.status,
+          request_id: requestId,
+          error: "Invalid outer JSON",
+          raw
+        });
         continue;
       }
 
@@ -145,8 +208,7 @@ app.post("/optimize", async (req, res) => {
           status: response.status,
           request_id: requestId,
           error: "Output truncated or empty (increase max_tokens or simplify prompt)",
-          finish_reason: finishReason,
-          raw: outer
+          finish_reason: finishReason
         });
         continue;
       }
@@ -159,13 +221,12 @@ app.post("/optimize", async (req, res) => {
           status: response.status,
           request_id: requestId,
           error: "No valid JSON found in model output",
-          raw: modelText
+          raw: typeof modelText === "string" ? modelText.slice(0, 1000) : modelText
         });
         continue;
       }
 
       const parsed = schema.safeParse(cleanData);
-
       if (!parsed.success) {
         errors.push({
           model,
@@ -192,13 +253,14 @@ app.post("/optimize", async (req, res) => {
     });
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message || "Internal server error" });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+
 
 
 
