@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/health", "destination": "/api/health" },
-    { "source": "/optimize", "destination": "/api/optimize" }
+    { "source": "/optimize", "destination": "/api/optimize" },
+    { "source": "/compare", "destination": "/api/compare" }
   ]
 }
