@@ -1,37 +1,80 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompt Clarity Tool</title>
-    <meta
-      name="description"
-      content="Herramienta comunitaria para optimización de prompts y benchmark de modelos, impulsada por June API."
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="app">
-      <h1>Prompt Clarity Tool</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Clarity Tool</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>Prompt Clarity Tool <span class="tag">Community</span></h1>
+      <p>Optimiza prompts y compara modelos con benchmark, latencia y ranking.</p>
+    </header>
 
-      <textarea id="promptInput" placeholder="Escribe tu prompt aquí..."></textarea>
-      <button id="analyzeBtn">Analyze</button>
+    <section class="card">
+      <label for="promptInput" class="label">Tu prompt</label>
+      <textarea id="promptInput" rows="6" placeholder="Ej: crea una estrategia para vender ropa deportiva por instagram en 7 dias"></textarea>
 
-      <div id="scoreCard" class="score-card hidden"></div>
-      <ul id="feedbackList"></ul>
+      <div class="actions">
+        <button id="optimizeBtn" class="btn primary">Optimize</button>
+        <button id="compareBtn" class="btn secondary">Compare Models</button>
+      </div>
 
-      <h2>Improved Version</h2>
-      <textarea id="improvedOutput" readonly></textarea>
+      <p id="statusText" class="status">Listo.</p>
+    </section>
 
-      <footer style="margin-top: 20px; font-size: 13px; color: #666;">
-        Powered by June API · Community-built tool by Erick Maita.
-        <br />
-        Built for prompt QA and model benchmarking.
-        <br />
-        <a href="https://askjune.ai" target="_blank" rel="noopener noreferrer">askjune.ai</a>
-      </footer>
-    </main>
+    <section id="optimizeSection" class="card hidden">
+      <h2>Resultado de Optimización</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Intent</h3>
+          <p id="intentText">-</p>
+        </div>
+        <div>
+          <h3>Clarity Score</h3>
+          <p id="clarityText">-</p>
+        </div>
+      </div>
+      <div>
+        <h3>Short Prompt</h3>
+        <p id="shortPromptText">-</p>
+      </div>
+      <div>
+        <h3>Optimized Prompt</h3>
+        <p id="optimizedPromptText">-</p>
+      </div>
+      <p class="meta" id="optMeta">-</p>
+    </section>
 
-    <script src="app.js"></script>
-  </body>
+    <section id="compareSection" class="card hidden">
+      <h2>Model Comparison</h2>
+
+      <div id="winnerBox" class="winner"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Modelo</th>
+              <th>Score</th>
+              <th>Latencia (ms)</th>
+              <th>Estado</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody id="rankingBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Powered by June API · Community project by Erick Maita
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
 </html>
