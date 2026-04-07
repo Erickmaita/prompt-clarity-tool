@@ -3,36 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>June Model Lab</title>
-  <link rel="stylesheet" href="./styles.css?v=2" />
+  <title>Laboratorio Modelo de Junio</title>
+  <link rel="stylesheet" href="./styles.css?v=3" />
 </head>
 <body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="bg-orb orb-c"></div>
+
   <main class="container">
     <header class="header">
-      <h1>June Model Lab <span class="tag">Community</span></h1>
+      <h1><span class="tag">Comunidad</span> del Laboratorio Modelo de Junio</h1>
       <p>Optimiza prompts y compara modelos por calidad, latencia y estabilidad.</p>
     </header>
 
     <section class="card">
-      <label for="promptInput" class="label">Tu prompt</label>
-      <textarea id="promptInput" rows="6" placeholder="Ej: explica bitcoin para principiantes y crea una version optimizada para un post educativo"></textarea>
+      <label for="promptInput" class="label">Tú lo indicas</label>
+      <textarea id="promptInput" rows="6" placeholder='Escribe algo sobre "bitcoin"'></textarea>
 
       <label for="modeSelect" class="label">Modo de comparación</label>
       <select id="modeSelect">
-        <option value="quick">Quick (estable)</option>
-        <option value="full">Full (amplio)</option>
-        <option value="custom">Custom (manual)</option>
+        <option value="quick">Rápido (estable)</option>
+        <option value="full">Completo (más modelos)</option>
+        <option value="custom">Personalizado (manual)</option>
       </select>
       <p id="modeInfo" class="meta">Quick: benchmark rápido y estable.</p>
 
       <div id="modelsContainer" class="models-grid"></div>
 
       <div class="actions">
-        <button id="optimizeBtn" class="btn primary">Optimize</button>
-        <button id="compareBtn" class="btn secondary">Compare Models</button>
+        <button id="optimizeBtn" class="btn primary">Optimizar</button>
+        <button id="compareBtn" class="btn secondary">Comparar modelos</button>
       </div>
 
-      <p id="statusText" class="status">Listo.</p>
+      <p id="statusText" class="status">Lista.</p>
     </section>
 
     <section id="optimizeSection" class="card hidden">
@@ -66,9 +70,10 @@
       </div>
     </section>
 
-    <footer class="footer">Powered by June API · Community project by Erick Maita</footer>
+    <footer class="footer">Desarrollado por June API · Proyecto comunitario de Erick Maita</footer>
   </main>
 
-  <script src="./app.js?v=2"></script>
+  <script src="./app.js?v=3"></script>
 </body>
 </html>
+
