@@ -1,60 +1,55 @@
-powershell -NoProfile -Command "@'
 <!doctype html>
-<html lang='es'>
+<html lang="es">
 <head>
-  <meta charset='UTF-8' />
-  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>June Model Lab</title>
-  <link rel='stylesheet' href='./styles.css' />
+  <link rel="stylesheet" href="./styles.css?v=2" />
 </head>
 <body>
-  <main class='container'>
-    <header class='header'>
-      <h1>June Model Lab <span class='tag'>Community</span></h1>
+  <main class="container">
+    <header class="header">
+      <h1>June Model Lab <span class="tag">Community</span></h1>
       <p>Optimiza prompts y compara modelos por calidad, latencia y estabilidad.</p>
     </header>
 
-    <section class='card'>
-      <label for='promptInput' class='label'>Tu prompt</label>
-      <textarea id='promptInput' rows='6' placeholder='Ej: explica bitcoin para principiantes y crea una version optimizada para un post educativo'></textarea>
+    <section class="card">
+      <label for="promptInput" class="label">Tu prompt</label>
+      <textarea id="promptInput" rows="6" placeholder="Ej: explica bitcoin para principiantes y crea una version optimizada para un post educativo"></textarea>
 
-      <div class='settings'>
-        <div>
-          <label for='modeSelect' class='label'>Modo de comparación</label>
-          <select id='modeSelect'>
-            <option value='quick'>Quick (estable)</option>
-            <option value='full'>Full (amplio)</option>
-            <option value='custom'>Custom (manual)</option>
-          </select>
-          <p id='modeInfo' class='meta'>Quick: benchmark rápido y estable.</p>
-        </div>
+      <label for="modeSelect" class="label">Modo de comparación</label>
+      <select id="modeSelect">
+        <option value="quick">Quick (estable)</option>
+        <option value="full">Full (amplio)</option>
+        <option value="custom">Custom (manual)</option>
+      </select>
+      <p id="modeInfo" class="meta">Quick: benchmark rápido y estable.</p>
+
+      <div id="modelsContainer" class="models-grid"></div>
+
+      <div class="actions">
+        <button id="optimizeBtn" class="btn primary">Optimize</button>
+        <button id="compareBtn" class="btn secondary">Compare Models</button>
       </div>
 
-      <div id='modelsContainer' class='models-grid'></div>
-
-      <div class='actions'>
-        <button id='optimizeBtn' class='btn primary'>Optimize</button>
-        <button id='compareBtn' class='btn secondary'>Compare Models</button>
-      </div>
-
-      <p id='statusText' class='status'>Listo.</p>
+      <p id="statusText" class="status">Listo.</p>
     </section>
 
-    <section id='optimizeSection' class='card hidden'>
+    <section id="optimizeSection" class="card hidden">
       <h2>Resultado de Optimización</h2>
-      <div class='grid-2'>
-        <div><h3>Intent</h3><p id='intentText'>-</p></div>
-        <div><h3>Clarity Score</h3><p id='clarityText'>-</p></div>
+      <div class="grid-2">
+        <div><h3>Intent</h3><p id="intentText">-</p></div>
+        <div><h3>Clarity Score</h3><p id="clarityText">-</p></div>
       </div>
-      <div><h3>Short Prompt</h3><p id='shortPromptText'>-</p></div>
-      <div><h3>Optimized Prompt</h3><p id='optimizedPromptText'>-</p></div>
-      <p class='meta' id='optMeta'>-</p>
+      <div><h3>Short Prompt</h3><p id="shortPromptText">-</p></div>
+      <div><h3>Optimized Prompt</h3><p id="optimizedPromptText">-</p></div>
+      <p class="meta" id="optMeta">-</p>
     </section>
 
-    <section id='compareSection' class='card hidden'>
+    <section id="compareSection" class="card hidden">
       <h2>Model Comparison</h2>
-      <div id='winnerBox' class='winner'></div>
-      <div class='table-wrap'>
+      <div id="winnerBox" class="winner"></div>
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
@@ -66,15 +61,14 @@ powershell -NoProfile -Command "@'
               <th>Error</th>
             </tr>
           </thead>
-          <tbody id='rankingBody'></tbody>
+          <tbody id="rankingBody"></tbody>
         </table>
       </div>
     </section>
 
-    <footer class='footer'>Powered by June API · Community project by Erick Maita</footer>
+    <footer class="footer">Powered by June API · Community project by Erick Maita</footer>
   </main>
 
-  <script src='./app.js'></script>
+  <script src="./app.js?v=2"></script>
 </body>
 </html>
-'@ | Set-Content -Encoding UTF8 .\index.html"
